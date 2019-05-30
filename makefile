@@ -2,7 +2,7 @@
 all: clear main
 
 main:
-	gcc main.c comparator.c -o main -lcrypt
+	gcc main.c -o main -lcrypt
 
 clear:
 	rm -rf main
