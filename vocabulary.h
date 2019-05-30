@@ -1,0 +1,6 @@
+#ifndef _VOCABULARY_H_
+#define _VOCABULARY_H_
+
+#define VOCABULARY "\0./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define VOCABULARY_BASE 65
+#endif
