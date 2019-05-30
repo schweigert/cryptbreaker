@@ -1,4 +1,6 @@
 
+all: clear main
+
 main:
 	gcc main.c comparator.c -o main -lcrypt
 
