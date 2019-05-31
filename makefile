@@ -8,4 +8,4 @@ clear:
 	rm -rf main
 
 run:
-	mpirun --mca btl_tcp_if_include wlp1s0 -n 25 -machinefile world.txt main 2 2
+	mpirun --mca btl_tcp_if_include wlp1s0 -n 25 -machinefile ip_list main 2 2
