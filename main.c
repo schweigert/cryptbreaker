@@ -20,6 +20,14 @@ void read_data() {
     data_size = boom_file_size(IMPUT_FN);
 }
 
+void print_rank_status() {
+    printf("rank %d of %d\n", world_rank, world_size);
+}
+
+int is_frontend() {
+    return world_rank == ROOT_ID;
+}
+
 void alloc_data() {
     data = malloc(sizeof(char)*(data_size + 1));
 }
@@ -57,13 +65,9 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-    printf("rank %d of %d\n", world_rank, world_size);
-
-    if (world_rank == ROOT_ID) {
-        front_end();
-    } else {
-        back_end();
-    }
+    print_rank_status();
+    
+    is_frontend() ? front_end() : back_end();
 
     MPI_Finalize();
     return 0;
