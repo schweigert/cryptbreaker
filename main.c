@@ -1,84 +1,52 @@
 #include <omp.h>
 #include <mpi.h>
-
+#include <crypt.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <crypt.h>
+#include "boom_file_read.h"
 
-#define FRONT_ID 0
+#define ROOT_ID 0
+#define IMPUT_FN "hash_list"
 
 int world_size = 1;
 int world_rank = 0;
 
-struct Imput {
-    char* hash;
-    struct Imput* next;
-};
+char* data = NULL;
+unsigned long data_size = 0;
 
-struct Imput* NewImput(char* hash, struct Imput* next) {
-    struct Imput* imput = (struct Imput*)malloc(sizeof(struct Imput));
-
-    imput->next = next;
-    imput->hash = hash;
-
-    return imput;
+void read_data() {
+    data = boom_file_read(IMPUT_FN);
+    data_size = boom_file_size(IMPUT_FN);
 }
 
-struct Imput* imput_list = NULL;
-
-char* read_line(FILE* file) {
-        char *line = (char*) malloc(sizeof(char) * 14);
-
-        if (fscanf(file, "%s", line) == EOF) {
-            return NULL;
-        }
-
-        return line;
+void broadcast_data() {
+    MPI_Bcast(data, data_size, MPI_CHAR, world_rank, MPI_COMM_WORLD);
 }
 
-void print_recursive_imput_list(struct Imput* imput) {
-    if (imput == NULL) {
-        return;
-    }
-
-    printf("%s\n", imput->hash);
-    print_recursive_imput_list(imput->next);
+void broadcast_data_size() {
+    MPI_Bcast(&data_size, 1, MPI_UNSIGNED_LONG, world_rank, MPI_COMM_WORLD);
 }
 
-void print_imput_list() {
-    print_recursive_imput_list(imput_list);
-}
-
-void import_imput_list() {
-    FILE* file;
-    char* line = NULL;
-
-    file = fopen("hash_list", "r");
-
-    if (file  == NULL) {
-        printf("Error while opening the file.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    while (1) {
-        line = read_line(file);
-
-        if (line == NULL) {
-            fclose(file);
-            return;
-        }
-
-        imput_list = NewImput(line, imput_list);
-    }
+void send_data() {
+    broadcast_data_size();
+    broadcast_data();
 }
 
 void front() {
-    import_imput_list();
-    print_imput_list();
+    read_data();
+    send_data();
 }
 
-void back() {}
+void recv_data() {
+    broadcast_data_size();
+    data = malloc(sizeof(char)*(data_size + 1));
+    broadcast_data();
+}
+
+void back() {
+    recv_data();
+}
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
@@ -87,7 +55,7 @@ int main(int argc, char** argv) {
 
     printf("rank %d of %d\n", world_rank, world_size);
 
-    if (world_rank == FRONT_ID) {
+    if (world_rank == ROOT_ID) {
         front();
     } else {
         back();
