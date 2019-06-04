@@ -43,12 +43,12 @@ void recv_data() {
     broadcast_data();
 }
 
-void front() {
+void front_end() {
     read_data();
     send_data();
 }
 
-void back() {
+void back_end() {
     recv_data();
 }
 
@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
     printf("rank %d of %d\n", world_rank, world_size);
 
     if (world_rank == ROOT_ID) {
-        front();
+        front_end();
     } else {
-        back();
+        back_end();
     }
 
     MPI_Finalize();
