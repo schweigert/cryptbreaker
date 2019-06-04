@@ -20,6 +20,10 @@ void read_data() {
     data_size = boom_file_size(IMPUT_FN);
 }
 
+void alloc_data() {
+    data = malloc(sizeof(char)*(data_size + 1));
+}
+
 void broadcast_data() {
     MPI_Bcast(data, data_size, MPI_CHAR, world_rank, MPI_COMM_WORLD);
 }
@@ -33,15 +37,15 @@ void send_data() {
     broadcast_data();
 }
 
+void recv_data() {
+    broadcast_data_size();
+    alloc_data();
+    broadcast_data();
+}
+
 void front() {
     read_data();
     send_data();
-}
-
-void recv_data() {
-    broadcast_data_size();
-    data = malloc(sizeof(char)*(data_size + 1));
-    broadcast_data();
 }
 
 void back() {
