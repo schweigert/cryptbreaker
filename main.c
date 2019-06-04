@@ -11,7 +11,46 @@
 int world_size = 1;
 int world_rank = 0;
 
-void read_keys() {
+struct Imput {
+    char* hash;
+    struct Imput* next;
+};
+
+struct Imput* NewImput(char* hash, struct Imput* next) {
+    struct Imput* imput = (struct Imput*)malloc(sizeof(struct Imput));
+
+    imput->next = next;
+    imput->hash = hash;
+
+    return imput;
+}
+
+struct Imput* imput_list = NULL;
+
+char* read_line(FILE* file) {
+        char *line = (char*) malloc(sizeof(char) * 14);
+
+        if (fscanf(file, "%s", line) == EOF) {
+            return NULL;
+        }
+
+        return line;
+}
+
+void print_recursive_imput_list(struct Imput* imput) {
+    if (imput == NULL) {
+        return;
+    }
+
+    printf("%s\n", imput->hash);
+    print_recursive_imput_list(imput->next);
+}
+
+void print_imput_list() {
+    print_recursive_imput_list(imput_list);
+}
+
+void import_imput_list() {
     FILE* file;
     char* line = NULL;
 
@@ -23,22 +62,21 @@ void read_keys() {
     }
 
     while (1) {
-        line = (char*) malloc(sizeof(char) * 14);
+        line = read_line(file);
 
-        if (fscanf(file, "%s", line) == EOF) {
+        if (line == NULL) {
             fclose(file);
             return;
         }
 
-        printf("%s\n", line);
+        imput_list = NewImput(line, imput_list);
     }
 }
 
-void setup() {
-    read_keys();
+void front() {
+    import_imput_list();
+    print_imput_list();
 }
-
-void front() {}
 
 void back() {}
 
@@ -48,8 +86,6 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
     printf("rank %d of %d\n", world_rank, world_size);
-
-    setup();
 
     if (world_rank == FRONT_ID) {
         front();
