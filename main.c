@@ -8,12 +8,26 @@
 
 #define ROOT_ID 0
 #define IMPUT_FN "hash_list"
+#define VOCABULARY "./0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM\0"
 
 int world_size = 1;
 int world_rank = 0;
 
+int vocabulary_size = 0;
+
 char* data = NULL;
 unsigned long data_size = 0;
+
+extern inline int count_vocabulary_size_is_ended() {
+    return VOCABULARY[vocabulary_size] == '\0';
+}
+
+void count_vocabulary_size() {
+    if (!count_vocabulary_size_is_ended()) {
+        vocabulary_size++;
+        count_vocabulary_size();
+    }
+}
 
 void read_data() {
     data = boom_file_read(IMPUT_FN);
@@ -22,6 +36,10 @@ void read_data() {
 
 void print_rank_status() {
     printf("rank %d of %d\n", world_rank, world_size);
+}
+
+void print_vocabulary_status() {
+    printf("vocabulary: %d |> '%s'\n", vocabulary_size, VOCABULARY);
 }
 
 int is_frontend() {
@@ -65,7 +83,10 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
+    count_vocabulary_size();
+
     print_rank_status();
+    print_vocabulary_status();
     
     is_frontend() ? front_end() : back_end();
 
