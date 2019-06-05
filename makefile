@@ -2,7 +2,7 @@
 all: clear main
 
 main:
-	mpicc main.c boom_file_read.c -o main -lcrypt -O3
+	mpicc main.c -o main -lcrypt -O3
 
 clear:
 	rm -rf main

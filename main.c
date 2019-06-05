@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "boom_file_read.h"
-
 #define ROOT_ID 0
 #define IMPUT_FN "hash_list"
 #define VOCABULARY "./0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM\0"
@@ -29,9 +27,33 @@ void count_vocabulary_size() {
     }
 }
 
+unsigned long read_file_size(char* name) {
+    FILE *file = fopen(name, "rb");
+    fseek(file, 0, SEEK_END);
+    unsigned long file_size = ftell(file);
+    fclose(file);
+
+    return file_size;
+}
+
+char* read_all_file(char* name) {
+    FILE *file = fopen(name, "rb");
+    fseek(file, 0, SEEK_END);
+    unsigned long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char *large_buffer = malloc(sizeof(char)*(file_size + 1));
+    fread(large_buffer, 1, file_size, file);
+    fclose(file);
+
+    large_buffer[file_size] = 0;
+
+    return large_buffer;
+}
+
 void read_data() {
-    data = boom_file_read(IMPUT_FN);
-    data_size = boom_file_size(IMPUT_FN);
+    data = read_all_file(IMPUT_FN);
+    data_size = read_file_size(IMPUT_FN);
 }
 
 void print_rank_status() {
