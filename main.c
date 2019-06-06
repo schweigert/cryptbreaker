@@ -3,6 +3,7 @@
 #include <crypt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HASH_SIZE 14
 #define VOCABULARY "./0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM\0"
@@ -112,10 +113,23 @@ void alloc_hash_list() {
     hash_list = (char**)malloc(sizeof(char*) * hash_list_size);
 }
 
+static int string_comparator(const void* a, const void* b) {
+    return strcmp(*(const char**)a, *(const char**)b); 
+} 
+  
+void sort(char** arr, int n) {
+    qsort(arr, n, sizeof(const char*), string_comparator); 
+}
+
+void sort_hash_list() {
+    sort(hash_list, hash_list_size);
+}
+
 void organize_data() {
     calcule_hash_list_size();
     alloc_hash_list();
     index_hash_list();
+    sort_hash_list();
 }
 
 void front_end() {
