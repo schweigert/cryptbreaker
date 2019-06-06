@@ -100,9 +100,7 @@ void calcule_hash_list_size() {
     hash_list_size = (unsigned int)((data_size + 1) / HASH_SIZE);
 }
 
-void alloc_hash_list() {
-    hash_list = (char**)malloc(sizeof(char*) * hash_list_size);
-
+void index_hash_list() {
     #pragma omp parallel for schedule(static)
     for(int index = 0; index < hash_list_size; index++) {
         hash_list[index] = &data[HASH_SIZE * index];
@@ -110,9 +108,14 @@ void alloc_hash_list() {
     }
 }
 
+void alloc_hash_list() {
+    hash_list = (char**)malloc(sizeof(char*) * hash_list_size);
+}
+
 void organize_data() {
     calcule_hash_list_size();
     alloc_hash_list();
+    index_hash_list();
 }
 
 void front_end() {
