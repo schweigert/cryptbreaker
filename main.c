@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ROOT_ID 0
-#define IMPUT_FN "hash_list"
+#define HASH_SIZE 14
 #define VOCABULARY "./0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM\0"
 
 int world_size = 1;
@@ -14,7 +13,9 @@ int world_rank = 0;
 int vocabulary_size = 0;
 
 char* data = NULL;
-unsigned long data_size = 0;
+int data_size = 0;
+
+const int root_id = 0;
 
 extern inline int count_vocabulary_size_is_ended() {
     return VOCABULARY[vocabulary_size] == '\0';
@@ -27,10 +28,10 @@ void count_vocabulary_size() {
     }
 }
 
-unsigned long read_file_size(char* name) {
+int read_file_size(char* name) {
     FILE *file = fopen(name, "rb");
     fseek(file, 0, SEEK_END);
-    unsigned long file_size = ftell(file);
+    int file_size = ftell(file);
     fclose(file);
 
     return file_size;
@@ -39,7 +40,7 @@ unsigned long read_file_size(char* name) {
 char* read_all_file(char* name) {
     FILE *file = fopen(name, "rb");
     fseek(file, 0, SEEK_END);
-    unsigned long file_size = ftell(file);
+    int file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     char *large_buffer = malloc(sizeof(char)*(file_size + 1));
@@ -52,20 +53,21 @@ char* read_all_file(char* name) {
 }
 
 void read_data() {
-    data = read_all_file(IMPUT_FN);
-    data_size = read_file_size(IMPUT_FN);
-}
-
-void print_rank_status() {
-    printf("rank %d of %d\n", world_rank, world_size);
-}
-
-void print_vocabulary_status() {
-    printf("vocabulary: %d |> '%s'\n", vocabulary_size, VOCABULARY);
+    data = read_all_file("imput");
+    data_size = read_file_size("imput");
 }
 
 int is_frontend() {
-    return world_rank == ROOT_ID;
+    return world_rank == root_id;
+}
+
+void print_rank_status() {
+    char* status = is_frontend() ? "frontend" : "backend";
+    printf("rank %d of %d (is %s)\n", world_rank, world_size, status);
+}
+
+void print_vocabulary_status() {
+    // printf("vocabulary: %d |> '%s'\n", vocabulary_size, VOCABULARY);
 }
 
 void alloc_data() {
@@ -73,11 +75,11 @@ void alloc_data() {
 }
 
 void broadcast_data() {
-    MPI_Bcast(data, data_size, MPI_CHAR, world_rank, MPI_COMM_WORLD);
+    MPI_Bcast(data, data_size, MPI_CHAR, root_id, MPI_COMM_WORLD);
 }
 
 void broadcast_data_size() {
-    MPI_Bcast(&data_size, 1, MPI_UNSIGNED_LONG, world_rank, MPI_COMM_WORLD);
+    MPI_Bcast(&data_size, 1, MPI_INT, root_id, MPI_COMM_WORLD);
 }
 
 void send_data() {
@@ -91,19 +93,29 @@ void recv_data() {
     broadcast_data();
 }
 
+void organize_data() {
+    int hashes_count = (data_size + 1) / HASH_SIZE;
+    printf("%lu %lu\n", data_size, hashes_count);
+}
+
 void front_end() {
     read_data();
     send_data();
+    organize_data();
 }
 
 void back_end() {
     recv_data();
+    organize_data();
 }
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    system("cp imput imput_bkp");
+    system("bash -c \"sort imput_bkp > imput\"");
 
     count_vocabulary_size();
 
