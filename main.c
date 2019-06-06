@@ -114,9 +114,6 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-    system("cp imput imput_bkp");
-    system("bash -c \"sort imput_bkp > imput\"");
-
     count_vocabulary_size();
 
     print_rank_status();
