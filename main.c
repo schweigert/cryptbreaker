@@ -13,7 +13,10 @@ int world_rank = 0;
 int vocabulary_size = 0;
 
 char* data = NULL;
-int data_size = 0;
+unsigned long data_size = 0;
+
+char** hash_list = 0;
+unsigned int hash_list_size = 0;
 
 const int root_id = 0;
 
@@ -28,10 +31,10 @@ void count_vocabulary_size() {
     }
 }
 
-int read_file_size(char* name) {
+unsigned long read_file_size(char* name) {
     FILE *file = fopen(name, "rb");
     fseek(file, 0, SEEK_END);
-    int file_size = ftell(file);
+    unsigned long file_size = ftell(file);
     fclose(file);
 
     return file_size;
@@ -40,7 +43,7 @@ int read_file_size(char* name) {
 char* read_all_file(char* name) {
     FILE *file = fopen(name, "rb");
     fseek(file, 0, SEEK_END);
-    int file_size = ftell(file);
+    unsigned long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     char *large_buffer = malloc(sizeof(char)*(file_size + 1));
@@ -67,7 +70,7 @@ void print_rank_status() {
 }
 
 void print_vocabulary_status() {
-    // printf("vocabulary: %d |> '%s'\n", vocabulary_size, VOCABULARY);
+    if (is_frontend()) printf("vocabulary: %d |> '%s'\n", vocabulary_size, VOCABULARY);
 }
 
 void alloc_data() {
@@ -79,7 +82,7 @@ void broadcast_data() {
 }
 
 void broadcast_data_size() {
-    MPI_Bcast(&data_size, 1, MPI_INT, root_id, MPI_COMM_WORLD);
+    MPI_Bcast(&data_size, 1, MPI_UNSIGNED_LONG, root_id, MPI_COMM_WORLD);
 }
 
 void send_data() {
@@ -93,9 +96,23 @@ void recv_data() {
     broadcast_data();
 }
 
+void calcule_hash_list_size() {
+    hash_list_size = (unsigned int)((data_size + 1) / HASH_SIZE);
+}
+
+void alloc_hash_list() {
+    hash_list = (char**)malloc(sizeof(char*) * hash_list_size);
+
+    #pragma omp parallel for schedule(static)
+    for(int index = 0; index < hash_list_size; index++) {
+        hash_list[index] = &data[HASH_SIZE * index];
+        hash_list[index][HASH_SIZE - 1] = '\0';
+    }
+}
+
 void organize_data() {
-    int hashes_count = (data_size + 1) / HASH_SIZE;
-    printf("%lu %lu\n", data_size, hashes_count);
+    calcule_hash_list_size();
+    alloc_hash_list();
 }
 
 void front_end() {

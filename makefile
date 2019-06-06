@@ -2,7 +2,7 @@
 all: clear main
 
 main:
-	mpicc main.c -o main -lcrypt -O3
+	mpicc main.c -o main -lcrypt -fopenmp -O2
 
 clear:
 	rm -rf main
