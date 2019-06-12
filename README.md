@@ -1,6 +1,6 @@
-# cryptbreaker
-
 ![cryptbreaker](cryptbreaker_art.jpg)
+
+# cryptbreaker
 
 Quebrando o método `crypt` da biblioteca `crypt.h`, usada para autenticação padrão do kernel GNU Linux/Unix like usando `OpenMP` & `MPI`.
 
