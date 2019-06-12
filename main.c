@@ -139,7 +139,7 @@ void organize_data() {
     sort_hash_list();
 }
 
-void search(char password[9], int thread_id) {
+void break_it(char password[9], int thread_id) {
     char salt[2] = {'\0', '\0'};
     char* hash;
 
@@ -147,83 +147,228 @@ void search(char password[9], int thread_id) {
     data.initialized = 0;
 
     for(int index; index < hash_list_size; index++) {
-        if (hash_list[index][0] == '\0' ) continue;
+        char *indexed_hash_list = hash_list[index];
+        if (indexed_hash_list[0] == '\0' ) continue;
 
-        if (hash_list[index][0] != salt[0] || hash_list[index][1] != salt[1]) {
-            salt[0] = hash_list[index][0];
-            salt[1] = hash_list[index][1];
+        if (indexed_hash_list[0] != salt[0] || indexed_hash_list[1] != salt[1]) {
+            salt[0] = indexed_hash_list[0];
+            salt[1] = indexed_hash_list[1];
             hash = crypt_r(password, salt, &data);
         }
 
         
-        if (hash_list[index][12] == hash[12] 
-            && hash_list[index][11] == hash[11]
-            && hash_list[index][10] == hash[10]
-            && hash_list[index][9] == hash[9]
-            && hash_list[index][8] == hash[8]
-            && hash_list[index][7] == hash[7]
-            && hash_list[index][6] == hash[6]
-            && hash_list[index][5] == hash[5]
-            && hash_list[index][4] == hash[4]
-            && hash_list[index][3] == hash[3]
-            && hash_list[index][2] == hash[2]
-            ) {
-               hash_list[index][0] = '\0';
-                printf("decrypted |> %s |> %s\n", hash, password);
+        if (indexed_hash_list[12] == hash[12] 
+            && indexed_hash_list[11] == hash[11]
+            && indexed_hash_list[10] == hash[10]
+            && indexed_hash_list[9] == hash[9]
+            && indexed_hash_list[8] == hash[8]
+            && indexed_hash_list[7] == hash[7]
+            && indexed_hash_list[6] == hash[6]
+            && indexed_hash_list[5] == hash[5]
+            && indexed_hash_list[4] == hash[4]
+            && indexed_hash_list[3] == hash[3]
+            && indexed_hash_list[2] == hash[2]) {
+            indexed_hash_list[0] = '\0';
+            printf("decrypted (THREAD %d RANK %d) |> %s |> %s\n", thread_id, world_rank, hash, password);
+        }
+    }
+}
+
+void combine_1() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        break_it(password, thread_id);
+    }
+}
+
+void combine_2() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+            break_it(password, thread_id);
+        }
+    }
+}
+
+void combine_3() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                break_it(password, thread_id);
+            }
+        }
+    }
+}
+
+void combine_4() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                for (int n3 = 0; n3 < vocabulary_size; n3 ++) {
+                    password[3] = VOCABULARY[n3];
+                    break_it(password, thread_id);
+                }
+            }
+        }
+    }
+}
+
+void combine_5() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                for (int n3 = 0; n3 < vocabulary_size; n3 ++) {
+                    password[3] = VOCABULARY[n3];
+                    for (int n4 = 0; n4 < vocabulary_size; n4 ++) {
+                        password[4] = VOCABULARY[n4];
+                        break_it(password, thread_id);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void combine_6() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                for (int n3 = 0; n3 < vocabulary_size; n3 ++) {
+                    password[3] = VOCABULARY[n3];
+                    for (int n4 = 0; n4 < vocabulary_size; n4 ++) {
+                        password[4] = VOCABULARY[n4];
+                        for (int n5 = 0; n5 < vocabulary_size; n5 ++) {
+                            password[5] = VOCABULARY[n5];
+                            break_it(password, thread_id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void combine_7() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                for (int n3 = 0; n3 < vocabulary_size; n3 ++) {
+                    password[3] = VOCABULARY[n3];
+                    for (int n4 = 0; n4 < vocabulary_size; n4 ++) {
+                        password[4] = VOCABULARY[n4];
+                        for (int n5 = 0; n5 < vocabulary_size; n5 ++) {
+                            password[5] = VOCABULARY[n5];
+                            for (int n6 = 0; n6 < vocabulary_size; n6 ++) {
+                                password[6] = VOCABULARY[n6];
+                                break_it(password, thread_id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void combine_8() {
+    #pragma omp parallel for
+    for (int n0 = world_rank; n0 < vocabulary_size; n0 += world_size) {
+        int thread_id = omp_get_thread_num();
+
+        char password[9] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+        password[0] = VOCABULARY[n0];
+
+        for (int n1 = 0; n1 < vocabulary_size; n1 ++) {
+            password[1] = VOCABULARY[n1];
+
+            for (int n2 = 0; n2 < vocabulary_size; n2 ++) {
+                password[2] = VOCABULARY[n2];
+                for (int n3 = 0; n3 < vocabulary_size; n3 ++) {
+                    password[3] = VOCABULARY[n3];
+                    for (int n4 = 0; n4 < vocabulary_size; n4 ++) {
+                        password[4] = VOCABULARY[n4];
+                        for (int n5 = 0; n5 < vocabulary_size; n5 ++) {
+                            password[5] = VOCABULARY[n5];
+                            for (int n6 = 0; n6 < vocabulary_size; n6 ++) {
+                                password[6] = VOCABULARY[n6];
+                                for (int n7 = 0; n7 < vocabulary_size; n7 ++) {
+                                    password[7] = VOCABULARY[n7];
+                                    break_it(password, thread_id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 void combine() {
-    for (int n0 = 0; n0 < vocabulary_size; n0 ++) {
-        char password[9] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-        int thread_id = omp_get_thread_num();
-        password[0] = VOCABULARY[n0];
-
-        #pragma omp parallel for
-        for (int n1 = 0; n1 < vocabulary_size; n1++) {
-            password[1] = VOCABULARY[n1];
-
-            for (int n2 = 0; n2 < vocabulary_size; n2++) {
-                password[2] = VOCABULARY[n2];
-
-                for (int n3 = 0; n3 < vocabulary_size; n3++) {
-                    password[3] = VOCABULARY[n3];
-
-                    for (int n4 = 0; n4 < vocabulary_size; n4++) {
-                        password[4] = VOCABULARY[n4];
-
-                        for (int n5 = 0; n5 < vocabulary_size; n5++) {
-                            password[5] = VOCABULARY[n5];
-
-                            for (int n6 = 0; n6 < vocabulary_size; n6++) {
-                                password[6] = VOCABULARY[n6];
-
-                                for (int n7 = 0; n7 < vocabulary_size; n7++) {
-                                    password[7] = VOCABULARY[n7];
-                                    search(password, thread_id);
-                                }
-                                password[7] = '\0';
-                                search(password, thread_id);
-                            }
-                            password[6] = '\0';
-                            search(password, thread_id);
-                        }
-                        password[5] = '\0';
-                        search(password, thread_id);
-                    }
-                    password[4] = '\0';
-                    search(password, thread_id);
-                }
-                password[3] = '\0';
-                search(password, thread_id);
-            }
-            password[2] = '\0';
-            search(password, thread_id);
-        }
-        password[1] = '\0';
-        search(password, thread_id);
-    }
+    combine_1();
+    combine_2();
+    combine_3();
+    combine_4();
+    combine_5();
+    combine_6();
+    combine_7();
+    combine_8();
 }
 
 void front_end() {
