@@ -1,4 +1,6 @@
-![cryptbreaker](cryptbreaker_art.jpg)
+<p align="center">
+    ![cryptbreaker](cryptbreaker_art.jpg)
+</p>
 
 # cryptbreaker
 
@@ -18,8 +20,9 @@ Quebrando o método `crypt` da biblioteca `crypt.h`, usada para autenticação p
 
 - Adicione as hashs ao arquivo `imput`. Ele seguirá o padrão de hash do `crypt`.
 
-![cryptbreaker](running.gif)
-
+<p align="center">
+    ![cryptbreaker](running.gif)
+</p>
 
 Execute com o comando:
 
