@@ -1,5 +1,5 @@
 
-all: clear build deploy
+all: clear build
 
 build:
 	mpicc cryptbreaker.c -o cryptbreaker.run -lcrypt -fopenmp -O2
@@ -8,10 +8,7 @@ clear:
 	rm -rf cryptbreaker.run
 
 run:
-	mpirun --mca -machinefile ip_list_to_run cryptbreaker.run 2 2
+	mpirun --mca -machinefile ip_list_to_run cryptbreaker.run
 
 deploy:
-	cp cryptbreaker ~/cryptbreaker.run
-	for i in `cat ip_list_to_copy`; do scp cryptbreaker.run $i:~/; done
-	cp imput ~/imput
-	mpirun --mca -machinefile ip_list_to_run ~/cryptbreaker.run 2 2
+	sh deploy.sh
