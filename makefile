@@ -1,11 +1,16 @@
 
-all: clear main
+all: clear build deploy
 
-main:
-	mpicc main.c -o main -lcrypt -fopenmp -O2
+build:
+	mpicc cryptbreaker.c -o cryptbreaker.run -lcrypt -fopenmp -O2
 
 clear:
-	rm -rf main
+	rm -rf cryptbreaker.run
 
 run:
-	mpirun --mca -n 2 -machinefile ip_list main 2 2
+	mpirun --mca -n 2 -machinefile ip_list cryptbreaker.run 2 2
+
+deploy:
+	cp cryptbreaker ~/cryptbreaker.run
+	cp imput ~/imput
+	mpirun --mca -n 2 -machinefile ip_list ~/cryptbreaker.run 2 2
