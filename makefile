@@ -8,9 +8,10 @@ clear:
 	rm -rf cryptbreaker.run
 
 run:
-	mpirun --mca -n 2 -machinefile ip_list cryptbreaker.run 2 2
+	mpirun --mca -machinefile ip_list_to_run cryptbreaker.run 2 2
 
 deploy:
 	cp cryptbreaker ~/cryptbreaker.run
+	for i in `cat ip_list_to_copy`; do scp cryptbreaker.run $i:~/; done
 	cp imput ~/imput
-	mpirun --mca -n 2 -machinefile ip_list ~/cryptbreaker.run 2 2
+	mpirun --mca -machinefile ip_list_to_run ~/cryptbreaker.run 2 2
