@@ -1,12 +1,2 @@
-192.168.7.72 slots=1
-192.168.2.54 slots=1
-192.168.2.25 slots=1
-192.168.2.46 slots=1
-192.168.2.48 slots=1
-192.168.2.99 slots=1
-192.168.2.34 slots=1
-192.168.2.103 slots=1
-192.168.3.41 slots=1
-192.168.3.110 slots=1
-192.168.3.190 slots=1
-192.168.6.203 slots=1
+localhost slots=1
+localhost slots=1
